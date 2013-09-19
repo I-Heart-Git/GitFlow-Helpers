@@ -1,0 +1,54 @@
+#!/bin/sh
+
+protected_branches_from_commit=( 'master' 'release' )
+
+current_branch=`git rev-parse --abbrev-ref HEAD`
+
+# Colors
+BoldGreen="\033[1;32m"
+White='\033[37m'
+Red="\033[0;31m"
+
+do_headsup(){
+	echo $BoldGreen
+	echo "- Git Hook (pre-commit) -"
+	echo $Red
+	echo "Heads Up!"
+}
+
+do_warn(){
+	do_headsup
+	echo "You shouldn't be commiting to "$1" branch."
+	echo "Only Hotfixes and Releases should be merged into "$1"."
+	echo $White
+
+	exec < /dev/tty
+
+	while true; do
+	  read -p "Are you sure you want to continue with the commit? (Y/n) " yn
+	  if [ "$yn" = "" ]; then
+	    yn='x'
+	  fi
+	  case $yn in
+	      [Yy] ) unset do_headsup; echo $White; exit 0;;
+	      [Nn] ) unset do_headsup; echo "Commit aborted."; echo $White; exit 1;;
+	      * ) echo ""; echo "Please answer Y for yes, or n for no.";;
+	  esac
+	done
+}
+
+
+# Warn from commiting
+for i in "${protected_branches_from_commit[@]}"
+do
+	if [ "$current_branch" = $i ]; then
+		do_warn $i
+	fi
+done
+
+
+
+unset do_headsup
+unset do_warn
+
+exit 0

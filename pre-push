@@ -1,0 +1,93 @@
+#!/bin/sh
+
+#remote="$1" # we can use this var to get the remote we are pushing to.
+#url="$2" # we can use this var to get the URL we are pushing to.
+
+protected_branches_from_delete=( 'master' 'development' )
+protected_branches_from_push=( 'master' 'release' )
+
+# Colors
+BoldGreen="\033[1;32m"
+White='\033[37m'
+Red="\033[0;31m"
+
+# Common vars
+# See original gist: https://gist.github.com/pixelhandler/5718585
+current_branch=$(git symbolic-ref HEAD | sed -e 's,.*/\(.*\),\1,')
+push_command=$(ps -ocommand= -p $PPID)
+is_destructive='force|delete|\-f'
+ 
+do_headsup(){
+	echo $BoldGreen
+	echo "- Git Hook (pre-push) -"
+	echo $Red
+	echo "Heads Up!"
+}
+
+do_exit(){
+	do_headsup
+	'Never force push or delete the '$1' branch!'
+  echo $White
+  exit 1
+}
+
+do_warn(){
+  exec < /dev/tty
+
+	do_headsup
+	echo "You shouldn't be pushing to "$1" branch, at least you are sending a recent merge of a Hotfix or a Release."
+	echo $White
+	
+	while true; do
+	  read -p "Are you sure you want to continue pushing? (Y/n) " yn
+	  if [ "$yn" = "" ]; then
+	    yn='x'
+	  fi
+	  case $yn in
+	      [Yy] ) echo $White; exit 0;;
+	      [Nn] ) echo "Push aborted."; echo $White; exit 1;;
+	      * ) echo ""; echo "Please answer Y for yes, or n for no.";;
+	  esac
+	done
+}
+
+
+
+# Protect from delete
+for i in "${protected_branches_from_delete[@]}"
+do
+	if [[ $push_command =~ $is_destructive ]] && [ $current_branch = $i ]; then
+	  do_exit $i
+	fi
+	 
+	if [[ $push_command =~ $is_destructive ]] && [[ $push_command =~ $i ]]; then
+	  do_exit $i
+	fi
+	
+	will_remove_protected_branch=':'$i
+	if [[ $push_command =~ $will_remove_protected_branch ]]; then
+	  do_exit $i
+	fi
+done
+ 
+
+
+# Warn from pushing:
+for i in "${protected_branches_from_push[@]}"
+do
+	if [[ $push_command =~ $i ]]; then
+	  do_warn $i
+	fi
+
+	if [ $current_branch = $i ]; then
+	  do_warn $i
+	fi
+done
+
+
+ 
+unset do_exit
+unset do_warn
+unset do_headsup
+ 
+exit 0
