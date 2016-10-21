@@ -41,7 +41,7 @@ do_warn(){
 	while true; do
 	  read -p "Are you sure you want to continue pushing? (Y/n) " yn
 	  if [ "$yn" = "" ]; then
-	    yn='x'
+	    yn='n'
 	  fi
 	  case $yn in
 	      [Yy] ) echo $White; exit 0;;
