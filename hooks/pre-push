@@ -3,8 +3,8 @@
 #remote="$1" # we can use this var to get the remote we are pushing to.
 #url="$2" # we can use this var to get the URL we are pushing to.
 
-protected_branches_from_delete=( 'master' 'development' )
-protected_branches_from_push=( 'master' 'release' )
+protected_branches_from_delete=( 'master' 'develop' )
+protected_branches_from_push=( 'master' 'develop' )
 
 # Colors
 BoldGreen="\033[1;32m"

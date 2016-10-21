@@ -1,6 +1,6 @@
 #!/bin/sh
 
-protected_branches_from_commit=( 'master' 'release' )
+protected_branches_from_commit=( 'master' 'develop' )
 
 current_branch=`git rev-parse --abbrev-ref HEAD`
 
@@ -19,7 +19,7 @@ do_headsup(){
 do_warn(){
 	do_headsup
 	echo "You shouldn't be commiting to "$1" branch."
-	echo "Only Hotfixes and Releases should be merged into "$1"."
+	echo "Ideally you should commit to a new branch."
 	echo $White
 
 	exec < /dev/tty

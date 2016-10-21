@@ -10,8 +10,8 @@ White='\033[37m'
 
 function git_branch_off
 {
-	if [ "$2" && "$3" ]; then
-    git fetch origin "$3":"$3"
+	if [[ "$2" && "$3" ]]; then
+        git fetch origin "$3":"$3"
 		git checkout -b "$1$namePrefix$2" "$3"
 	fi
 }
